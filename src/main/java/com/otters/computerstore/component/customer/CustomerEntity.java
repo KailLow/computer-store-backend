@@ -3,37 +3,17 @@ package com.otters.computerstore.component.customer;
 import com.otters.computerstore.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
 @Entity
 @Table
+@Setter
 public class CustomerEntity extends BaseEntity {
     private String name;
     private String phone;
     private String address;
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
 
     public CustomerEntity(){};
 
