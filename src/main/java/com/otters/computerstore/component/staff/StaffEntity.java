@@ -27,4 +27,25 @@ public class StaffEntity extends BaseEntity {
         this.email = email;
         this.citizenId = citizenId;
     }
+
+    public StaffEntity(String name, String phone,String password, String role, String email, String citizenId) {
+        this.name = name;
+        this.phone = phone;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.citizenId = citizenId;
+    }
+
+    @Override
+    public String toString() {
+        return "StaffEntity{" +
+                "name='" + name + '\'' +
+                ", phone='" + phone + '\'' +
+                ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
+                ", email='" + email + '\'' +
+                ", citizenId='" + citizenId + '\'' +
+                '}';
+    }
 }
