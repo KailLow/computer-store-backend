@@ -12,13 +12,15 @@ import lombok.Setter;
 @Setter
 public class ImportProductEntity extends BaseEntity {
     private String productId;
+    private String importBillId;
     private Integer quantity;
     private Integer index;
     private Long price;
     private String unit;
 
-    public ImportProductEntity(String productId, Integer quantity, Integer index, Long price, String unit) {
+    public ImportProductEntity(String productId, String importBillId, Integer quantity, Integer index, Long price, String unit) {
         this.productId = productId;
+        this.importBillId = importBillId;
         this.quantity = quantity;
         this.index = index;
         this.price = price;
@@ -29,6 +31,7 @@ public class ImportProductEntity extends BaseEntity {
     public String toString() {
         return "ImportProductEntity{" +
                 "productId='" + productId + '\'' +
+                ", importBillId='" + importBillId + '\'' +
                 ", quantity=" + quantity +
                 ", index=" + index +
                 ", price=" + price +
