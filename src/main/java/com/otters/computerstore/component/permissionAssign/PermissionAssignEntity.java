@@ -1,11 +1,9 @@
 package com.otters.computerstore.component.permissionAssign;
 
 import com.otters.computerstore.component.permission.PermissionEntity;
+import com.otters.computerstore.component.staff.StaffEntity;
 import com.otters.computerstore.entity.NoteEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,19 +12,20 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PermissionAssignEntity extends NoteEntity {
-    private String staffId;
-    private String permissionId;
+
     private String itemId;
     private String type;
 
-    @ManyToOne
-    @JoinColumn(name = "id", insertable = false, updatable = false)
-    private PermissionEntity permissions;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "permission_id")
+    private StaffEntity staff;
 
-    public PermissionAssignEntity(String note, String staffId, String permissionId, String itemId, String type) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "staff_id")
+    private PermissionEntity permission;
+
+    public PermissionAssignEntity(String note, String itemId, String type) {
         super(note);
-        this.staffId = staffId;
-        this.permissionId = permissionId;
         this.itemId = itemId;
         this.type = type;
     }
@@ -34,8 +33,6 @@ public class PermissionAssignEntity extends NoteEntity {
     @Override
     public String toString() {
         return "PermissionAssignEntity{" +
-                "staffId='" + staffId + '\'' +
-                ", permissionId='" + permissionId + '\'' +
                 ", itemId='" + itemId + '\'' +
                 ", type='" + type + '\'' +
                 '}';

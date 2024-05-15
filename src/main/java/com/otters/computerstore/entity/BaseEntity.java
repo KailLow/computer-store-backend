@@ -17,33 +17,33 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
-    @Column(name = "createddate")
-    @CreatedDate
-    private Date createdDate;
-
-    @Column(name = "modifieddate")
-    @LastModifiedDate
-    private Date modifiedDate;
-
-    @Column(name = "createdby")
-    @CreatedBy
-    private String createdBy;
-
-    @Column(name = "modifiedby")
-    @LastModifiedBy
-    private String modifiedBy;
+//    @Column(name = "createddate")
+//    @CreatedDate
+//    private Date createdDate;
+//
+//    @Column(name = "modifieddate")
+//    @LastModifiedDate
+//    private Date modifiedDate;
+//
+//    @Column(name = "createdby")
+//    @CreatedBy
+//    private String createdBy;
+//
+//    @Column(name = "modifiedby")
+//    @LastModifiedBy
+//    private String modifiedBy;
 
     @Override
     public String toString() {
         return "BaseEntity{" +
                 "id=" + id +
-                ", createdDate=" + createdDate +
-                ", modifiedDate=" + modifiedDate +
-                ", createdBy='" + createdBy + '\'' +
-                ", modifiedBy='" + modifiedBy + '\'' +
+//                ", createdDate=" + createdDate +
+//                ", modifiedDate=" + modifiedDate +
+//                ", createdBy='" + createdBy + '\'' +
+//                ", modifiedBy='" + modifiedBy + '\'' +
                 '}';
     }
 }
