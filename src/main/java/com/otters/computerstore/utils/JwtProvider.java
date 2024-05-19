@@ -48,6 +48,7 @@ public class JwtProvider {
     }
 
     public String generateToken(UserDetails userDetails) {
+        System.out.println("logina");
         return generateToken(new HashMap<>(), userDetails);
     }
 
