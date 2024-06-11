@@ -1,44 +1,34 @@
 package com.otters.computerstore.component.permission;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.otters.computerstore.component.permissionAssign.PermissionAssignEntity;
+import com.otters.computerstore.component.staff.StaffEntity;
 import com.otters.computerstore.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.antlr.v4.runtime.misc.NotNull;
+
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
 @Table
+@RequiredArgsConstructor
 public class PermissionEntity extends BaseEntity {
-    private String name;
-    private String phone;
-    private String username;
-    private String password;
-    private String role;
-    private String email;
-    private String citizenId;
+    @Enumerated(EnumType.STRING)
+    private PermissionType permissionType;
+    @Enumerated(EnumType.STRING)
+    private EntityType entityType;
+    private String entityId;
 
-    public PermissionEntity(String name, String phone, String username, String password, String role, String email, String citizenId) {
-        this.name = name;
-        this.phone = phone;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.email = email;
-        this.citizenId = citizenId;
-    }
+    @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL)
+    private Set<PermissionAssignEntity> permissionAssigns;
 
     @Override
     public String toString() {
-        return "PermissionEntity{" +
-                "name='" + name + '\'' +
-                ", phone='" + phone + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
-                ", email='" + email + '\'' +
-                ", citizenId='" + citizenId + '\'' +
-                '}';
+        return permissionType + ":" + entityType + (entityId != null ? ":" + entityId : "");
     }
 }
