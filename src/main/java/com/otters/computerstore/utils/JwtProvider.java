@@ -48,7 +48,6 @@ public class JwtProvider {
     }
 
     public String generateToken(UserDetails userDetails) {
-        System.out.println("logina");
         return generateToken(new HashMap<>(), userDetails);
     }
 
@@ -70,14 +69,15 @@ public class JwtProvider {
             UserDetails userDetails,
             long expiration
     ) {
-        return Jwts
+        String compact = Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignInKey(), SignatureAlgorithm.HS512)
                 .compact();
+        return compact;
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
