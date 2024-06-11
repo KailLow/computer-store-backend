@@ -1,2 +1,32 @@
-package com.otters.computerstore.component.envers;public class UserRevisionListener {
+package com.otters.computerstore.component.envers;
+
+import com.otters.computerstore.component.staff.StaffEntity;
+import org.hibernate.envers.RevisionListener;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Optional;
+
+public class UserRevisionListener implements RevisionListener {
+    @Override
+    public void newRevision(Object revisionEntity) {
+        AuditEnversInfo auditEnversInfo = (AuditEnversInfo) revisionEntity;
+        auditEnversInfo.setUsername(getUsername());
+    }
+    private String getUsername(){
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication instanceof AnonymousAuthenticationToken
+        ) {
+            return null;
+        }
+
+        StaffEntity userPrincipal = (StaffEntity) authentication.getPrincipal();
+        return userPrincipal.getUsername();
+    }
 }

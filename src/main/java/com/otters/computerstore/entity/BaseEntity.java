@@ -19,6 +19,7 @@ public class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    private Boolean isStopped = false;
 
 //    @Column(name = "createddate")
 //    @CreatedDate

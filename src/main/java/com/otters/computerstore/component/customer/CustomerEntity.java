@@ -1,34 +1,40 @@
 package com.otters.computerstore.component.customer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.otters.computerstore.component.saleBill.SaleBillEntity;
+import com.otters.computerstore.component.warrantyBill.WarrantyBillEntity;
 import com.otters.computerstore.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import com.otters.computerstore.utils.validator.PhoneNumberFormat;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
-@Getter
+import java.util.List;
+
 @Entity
 @Table
+@Getter
 @Setter
+@RequiredArgsConstructor
+@Audited
 public class CustomerEntity extends BaseEntity {
     private String name;
+    @Column(unique=true)
+    @PhoneNumberFormat(message = "Invalid phone number")
     private String phone;
     private String address;
+    //sai ne
+    @JsonIgnoreProperties(value = {"warrantyBill"})
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+//    @NotAudited
+    @JsonIgnore
+    private List<WarrantyBillEntity> warrantyBills;
 
-    public CustomerEntity(){};
-
-    public CustomerEntity(String name, String phone, String address){
-        this.name = name;
-        this.phone = phone;
-        this.address = address;
-    }
-
-    @Override
-    public String toString() {
-        return "Customer{" +
-                "name='" + name + '\'' +
-                ", phone='" + phone + '\'' +
-                ", address='" + address + '\'' +
-                '}';
-    }
+    @JsonIgnoreProperties(value = {"saleBill"})
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+//    @NotAudited
+    @JsonIgnore
+    private List<SaleBillEntity> saleBills;
 }
