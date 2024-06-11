@@ -1,28 +1,18 @@
 package com.otters.computerstore.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class NoteEntity extends BaseEntity{
-    @Column(name = "note")
-    private String note;
-
-    public NoteEntity(String note) {
-        this.note = note;
-    }
-
-    @Override
-    public String toString() {
-        return "NoteEntity{" +
-                "note='" + note + '\'' +
-                '}';
-    }
+    protected String note;
 }
