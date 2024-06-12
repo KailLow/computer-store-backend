@@ -1,36 +1,47 @@
 package com.otters.computerstore.component.warrantyBill;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.otters.computerstore.component.customer.CustomerEntity;
+import com.otters.computerstore.component.warrantyProduct.WarrantyProductEntity;
 import com.otters.computerstore.entity.NoteEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.Date;
+import java.util.List;
 
-@Getter
-@Setter
 @Entity
 @Table
+@Getter
+@Setter
+@RequiredArgsConstructor
+@Audited
 public class WarrantyBillEntity extends NoteEntity {
     private String staffId;
-    private String customerId;
-
     private Date warrantyDate;
+    @NotAudited
+    @JsonIgnoreProperties(value = {"warrantyProducts"})
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "warrantyBill")
+    private List<WarrantyProductEntity> warrantyProducts;
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    @JsonIgnoreProperties(value = {"warrantyBills"})
+    private CustomerEntity customer;
 
-    public WarrantyBillEntity(String note, String staffId, String customerId, Date warrantyDate) {
-        super(note);
+    public WarrantyBillEntity(String staffId, CustomerEntity customer, Date warrantyDate) {
         this.staffId = staffId;
-        this.customerId = customerId;
+        this.setCustomer(customer);
         this.warrantyDate = warrantyDate;
     }
 
-    @Override
-    public String toString() {
-        return "WarrantyBillEntity{" +
-                "staffId='" + staffId + '\'' +
-                ", customerId='" + customerId + '\'' +
-                ", warrantyDate=" + warrantyDate +
-                '}';
+    public WarrantyBillEntity(String staffId, CustomerEntity customer, Date warrantyDate, String id) {
+        this.staffId = staffId;
+        this.setCustomer(customer);
+        this.warrantyDate = warrantyDate;
+        this.setId(id);
     }
 }

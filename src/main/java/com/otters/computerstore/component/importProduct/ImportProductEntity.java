@@ -1,41 +1,35 @@
 package com.otters.computerstore.component.importProduct;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.otters.computerstore.component.importBill.ImportBillEntity;
+import com.otters.computerstore.component.product.ProductEntity;
 import com.otters.computerstore.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
+
+import java.util.List;
 
 @Entity
 @Table
 @Getter
 @Setter
+@RequiredArgsConstructor
+@AllArgsConstructor
+@Audited
 public class ImportProductEntity extends BaseEntity {
-    private String productId;
-    private String importBillId;
     private Integer quantity;
-    private Integer index;
     private Long price;
-    private String unit;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    @JsonIgnoreProperties(value = {"importProducts"})
+    private ProductEntity product;
+    @ManyToOne
+    @JoinColumn(name = "importBill_id")
+    @JsonIgnoreProperties(value = {"importProducts"})
+    private ImportBillEntity importBill;
 
-    public ImportProductEntity(String productId, String importBillId, Integer quantity, Integer index, Long price, String unit) {
-        this.productId = productId;
-        this.importBillId = importBillId;
-        this.quantity = quantity;
-        this.index = index;
-        this.price = price;
-        this.unit = unit;
-    }
-
-    @Override
-    public String toString() {
-        return "ImportProductEntity{" +
-                "productId='" + productId + '\'' +
-                ", importBillId='" + importBillId + '\'' +
-                ", quantity=" + quantity +
-                ", index=" + index +
-                ", price=" + price +
-                ", unit='" + unit + '\'' +
-                '}';
-    }
 }

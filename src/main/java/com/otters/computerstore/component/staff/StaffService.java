@@ -1,19 +1,159 @@
 package com.otters.computerstore.component.staff;
 
+import com.otters.computerstore.component.envers.AuditEnversInfo;
+import com.otters.computerstore.component.envers.AuditEnversInfoRepo;
+import com.otters.computerstore.component.staff.dto.StaffDTO;
+import com.otters.computerstore.mapper.DTOtoEntityMapper;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
+import org.hibernate.envers.query.AuditEntity;
+import org.hibernate.envers.query.AuditQuery;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static com.otters.computerstore.utils.Random.random;
 
 @Service
 @RequiredArgsConstructor
 public class StaffService {
+    private final EntityManager entityManager;
+    private final AuditEnversInfoRepo auditEnversInfoRepo;
     private final StaffRepo staffRepository;
+    private final DTOtoEntityMapper mapper;
+    private final PasswordEncoder passwordEncoder;
+
+
 
     public void getStaffProfile(Principal connectedUser) {
         StaffEntity staff = (StaffEntity) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    }
 
+    public StaffEntity addStaff(StaffDTO dto) throws Exception {
+        Optional<StaffEntity> optional = staffRepository.findByCitizenId(dto.getCitizenId());
+        if (optional.isPresent()) {
+            if (optional.get().getIsStopped() == true)
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, new Error("Staff has resigned").toString());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, new Error("Staff has been existed").toString());
+        }
+        StaffEntity staff = updateFromDTO(dto, new StaffEntity());
+        staff.setIsStopped(false);
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        String password = random(10, characters);
+        staff.setPassword(passwordEncoder.encode(password));
+        System.out.println(staff.getEmail());
+        return staffRepository.save(staff);
+    }
+
+    public void changePassword(String oldPassword, String newPassword, Principal connectedUser) throws Exception {
+        StaffEntity staff = (StaffEntity) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        Optional<StaffEntity> optional = staffRepository.findById(staff.getId());
+        if (optional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, new Error("Staff has not been existed").toString());
+        }
+        try {
+            if (optional.get().getIsStopped() == true)
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, new Error("Staff has resigned").toString());
+        } catch (NullPointerException e) {
+        }
+        if (!passwordEncoder.matches(oldPassword, optional.get().getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, new Error("Password not true").toString());
+        }
+        optional.get().setPassword(passwordEncoder.encode(newPassword));
+
+        staffRepository.save(optional.get());
+    }
+
+    private StaffEntity updateFromDTO(StaffDTO dto, StaffEntity staff) {
+        mapper.updateStaffFromDto(dto, staff);
+        return staff;
+    }
+
+    public StaffEntity update(StaffDTO dto, String id) throws IOException {
+        Optional<StaffEntity> optional = staffRepository.findByCitizenId(dto.getCitizenId());
+        if (optional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, new Error("Staff not existed").toString());
+        }
+        if (optional.get().getIsStopped() == true)
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, new Error("Staff has resigned").toString());
+        StaffEntity staffEntity = updateFromDTO(dto, staffRepository.findById(id).get());
+        return staffRepository.save(staffEntity);
+    }
+
+    public List<StaffEntity> findByName(String name) {
+        return staffRepository.findByNameContainingIgnoreCaseAndIsStopped(name, false);
+    }
+
+    public StaffEntity findByMail(String email) {
+        return staffRepository.findByEmail(email).get();
+    }
+
+    public List<StaffEntity> findResigned(String name) {
+        return staffRepository.findByNameContainingIgnoreCaseAndIsStopped(name, true);
+    }
+
+    public StaffEntity getOne(String id) {
+        Optional<StaffEntity> staff = staffRepository.findById(id);
+        if (staff.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, new Error("Staff not existed").toString());
+        }
+        if (staff.get().getIsStopped() == true)
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, new Error("Staff has resigned").toString());
+        return staff.get();
+    }
+
+    public void remove(String id) {
+        Optional<StaffEntity> staff = staffRepository.findById(id);
+        if (staff.isEmpty())
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, new Error("Staff not existed").toString());
+        staff.get().setIsStopped(true);
+        staffRepository.save(staff.get());
+    }
+
+    public List<?> getRevisionsForStaff(String id) {
+        AuditReader auditReader = AuditReaderFactory.get(entityManager);
+
+        AuditQuery query = auditReader.createQuery()
+                .forRevisionsOfEntity(StaffEntity.class, true, true)
+                .add(AuditEntity.id().eq(id))
+                .addProjection(AuditEntity.revisionNumber())
+                .addProjection(AuditEntity.property("id"))
+                .addProjection(AuditEntity.property("name"))
+                .addProjection(AuditEntity.property("phone"))
+                .addProjection(AuditEntity.property("email"))
+                .addProjection(AuditEntity.property("citizenId"))
+                .addProjection(AuditEntity.property("role"))
+                .addProjection(AuditEntity.revisionType())
+                .addOrder(AuditEntity.revisionNumber().desc());
+
+        List<AuditEnversInfo> staffAudit = new ArrayList<AuditEnversInfo>();
+        List<Object[]> objects = query.getResultList();
+        for (int i = 0; i < objects.size(); i++) {
+            Object[] objArray = objects.get(i);
+            Optional<AuditEnversInfo> auditEnversInfoOptional = auditEnversInfoRepo.findById((int) objArray[0]);
+            if (auditEnversInfoOptional.isPresent()) {
+                AuditEnversInfo auditEnversInfo = auditEnversInfoOptional.get();
+                StaffDTO staff = new StaffDTO(id, (String) objArray[2], (String) objArray[3], (String) objArray[4], (String) objArray[5], (Role) objArray[6]);
+                auditEnversInfo.setRevision(staff);
+                staffAudit.add(auditEnversInfo);
+            }
+        }
+        return staffAudit;
     }
 }

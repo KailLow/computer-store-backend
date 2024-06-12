@@ -1,16 +1,17 @@
 package com.otters.computerstore.component.permission;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.otters.computerstore.component.permissionAssign.PermissionAssignEntity;
 import com.otters.computerstore.component.staff.StaffEntity;
 import com.otters.computerstore.entity.BaseEntity;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.antlr.v4.runtime.misc.NotNull;
+import org.hibernate.envers.Audited;
 
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,8 +25,11 @@ public class PermissionEntity extends BaseEntity {
     private EntityType entityType;
     private String entityId;
 
-    @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL)
-    private Set<PermissionAssignEntity> permissionAssigns;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @JoinColumn(name = "staff_id")
+    @JsonIgnoreProperties(value = {"permissions"})
+    @NotNull
+    private StaffEntity staff;
 
     @Override
     public String toString() {
