@@ -25,7 +25,7 @@ public class CustomerEntity extends BaseEntity {
     @PhoneNumberFormat(message = "Invalid phone number")
     private String phone;
     private String address;
-    //sai ne
+
     @JsonIgnoreProperties(value = {"warrantyBill"})
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
 //    @NotAudited

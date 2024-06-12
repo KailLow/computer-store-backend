@@ -1,49 +1,84 @@
 package com.otters.computerstore.component.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.otters.computerstore.component.category.CategoryEntity;
+import com.otters.computerstore.component.importProduct.ImportProductEntity;
+import com.otters.computerstore.component.saleProduct.SaleProductEntity;
+import com.otters.computerstore.component.supplier.SupplierEntity;
+import com.otters.computerstore.component.warrantyProduct.WarrantyProductEntity;
 import com.otters.computerstore.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.Date;
+import java.util.List;
+
 
 @Entity
 @Table
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
+@Audited
 public class ProductEntity extends BaseEntity {
+    @Column(length=4069)
+    private String specifications;
+    @Column(unique = true)
+    @NotNull
     private String name;
-    private String categoryId;
-    private String supplierId;
+    @ManyToOne
+    @NotAudited
+    @JoinColumn(name = "category_id")
+    @JsonIgnoreProperties(value = {"products"})
+    private CategoryEntity category;
+    @ManyToMany
+    @NotAudited
+    @JsonIgnore
+    @JsonIgnoreProperties(value = {"products"})
+    private List<SupplierEntity> suppliers;
     private String unit;
     private Long price;
     private Integer quantity;
-    private Date warrantyPeriod;
-    private Boolean isAvailable;
+    private Integer warrantyPeriod;
+    private Boolean isAvailable = true;
+    @Column(length=4069)
+    private String photoURL;
 
-    public ProductEntity(String name, String categoryId, String supplierId, String unit,  Long price, Integer quantity, Date warrantyPeriod, Boolean isAvailable) {
+    public ProductEntity(String id , String name, CategoryEntity category, String unit, Long price, Integer quantity, Integer warrantyPeriod, Boolean isAvailable, String photoURL, String specifications){
+        this.setId(id);
         this.name = name;
-        this.categoryId = categoryId;
-        this.supplierId = supplierId;
+        this.category = category;
         this.unit = unit;
         this.price = price;
         this.quantity = quantity;
         this.warrantyPeriod = warrantyPeriod;
         this.isAvailable = isAvailable;
+        this.photoURL = photoURL;
+        this.specifications = specifications;
     }
 
-    @Override
-    public String toString() {
-        return "ProductEntity{" +
-                "name='" + name + '\'' +
-                ", categoryId='" + categoryId + '\'' +
-                ", supplierId='" + supplierId + '\'' +
-                ", unit='" + unit + '\'' +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                ", warrantyPeriod=" + warrantyPeriod +
-                ", isAvailable=" + isAvailable +
-                '}';
-    }
+    @JsonIgnoreProperties(value = {"importProducts"})
+    @NotAudited
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
+    private List<ImportProductEntity> importProducts;
+    @JsonIgnoreProperties(value = {"saleProducts"})
+    @NotAudited
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
+    private List<SaleProductEntity> saleProducts;
+    @JsonIgnoreProperties(value = {"warrantyProducts"})
+    @NotAudited
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
+    private List<WarrantyProductEntity> warrantyProducts;
+
 }

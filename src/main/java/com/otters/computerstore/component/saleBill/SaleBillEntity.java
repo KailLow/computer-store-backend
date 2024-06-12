@@ -1,42 +1,53 @@
 package com.otters.computerstore.component.saleBill;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.otters.computerstore.component.customer.CustomerEntity;
+import com.otters.computerstore.component.saleProduct.SaleProductEntity;
 import com.otters.computerstore.entity.NoteEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table
 @Getter
 @Setter
+@RequiredArgsConstructor
+@Audited
 public class SaleBillEntity extends NoteEntity {
     private String staffId;
-    private String customerId;
-
     private String paymentMethod;
-    private Date saleDate;
     private Float discount;
+    @JsonIgnoreProperties(value = {"saleBill"})
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "saleBill")
+    private List<SaleProductEntity> saleProducts;
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    @JsonIgnoreProperties(value = {"saleBills"})
+    private CustomerEntity customer;
 
-    public SaleBillEntity(String note, String staffId, String customerId, String paymentMethod, Date saleDate, Float discount) {
-        super(note);
+    public SaleBillEntity(String staffId, String paymentMethod, Float discount) {
         this.staffId = staffId;
-        this.customerId = customerId;
         this.paymentMethod = paymentMethod;
-        this.saleDate = saleDate;
+        this.discount =discount;
+    }
+    public SaleBillEntity(String staffId, CustomerEntity customer, String paymentMethod, Float discount) {
+        this.staffId = staffId;
+        this.setCustomer(customer);
+        this.paymentMethod = paymentMethod;
         this.discount = discount;
     }
-
-    @Override
-    public String toString() {
-        return "SaleBillEntity{" +
-                "staffId='" + staffId + '\'' +
-                ", customerId='" + customerId + '\'' +
-                ", paymentMethod='" + paymentMethod + '\'' +
-                ", saleDate=" + saleDate +
-                ", discount=" + discount +
-                '}';
+    public SaleBillEntity(String staffId, CustomerEntity customer, String paymentMethod, Float discount,String id ) {
+        this.staffId = staffId;
+        this.setCustomer(customer);
+        this.paymentMethod = paymentMethod;
+        this.discount = discount;
+        this.setId(id);
     }
 }
